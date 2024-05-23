@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dodgy Dice Detector</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <style>
+        .container.padded {padding-top:20px}
+
+        .container-fluid.full-width {
+            padding-left: 0;
+            padding-right: 0;
+            overflow-x: hidden;
+        }
+
+        .form-group.padded {padding-top:20px}
+
+        body {color: #C0C0C0FF
+        }
+
+        a:link,a:visited  {
+            color: #5c5cb7;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        a:hover {
+          color: #ffff00;
+        }
+
+        .card {background-color:#383a3c}
+
+        input[type='number'] {
+            width:80px;
+            text-align:center;
+        }
+
+        #FaceCounts1 td
+        {
+            text-align: center;
+            vertical-align: middle;
+        }
+        #FaceCounts2 td
+        {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+    </style>
+
+</head>
+<body style="background-color: #495057">
+    <div class="container-fluid full-width">
+            <div class="row" style="background-color: #212529">
+                <div class="col d-flex justify-content-center">
+                    <a href="/landing" style="color: whitesmoke;text-decoration: none;"><h2>Dodgy Dice</h2></a>
+                </div>
+            </div>
+            <div class="row" style="background-color: #212529">
+                <div class="col d-flex justify-content-center">
+                    <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Support Me on Ko-fi', '#29abe0', 'G2G1342LU');kofiwidget2.draw();</script>
+                </div>
+            </div>
+        </div>
+    <div class="container padded">
+        <div class="row">
+            <div class="col text-center">
+                <h5>Test a Die</h5>
+                <p style="margin : 0; padding-top:0;">Now let's test a die.</p>
+                <p style="margin : 0; padding-top:0;">If you already have a set of rolls for your die, just type them in.</p>
+                <p style="margin : 0; padding-top:0;">Otherwise, start rolling the die and hit the buttons to add a single roll.</p>
+                <p style="margin : 0; padding-top:0;">You need at least 100 rolls for the test to work, but this will only detect extreme imbalance.</p>
+                <p style="margin : 0; padding-top:0;">To detect small imbalances you will need to perform more rolls.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-center border border-secondary">
+                <h4>Single Face</h4>
+                <p id="singlescore">aaa</p>
+                <p id="singlenote">aaa</p>
+
+            </div>
+            <div class="col text-center border border-secondary">
+                <h4>Neighbourhood</h4>
+                <p id="neighbourscore">aaa</p>
+                <p id="neighbournote">aaa</p>
+
+            </div>
+            <div class="col text-center border border-secondary">
+                <h4>Vertex Area</h4>
+                <p id="vertexscore">aaa</p>
+                <p id="vertexnote">aaa</p>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-center">
+                <p id="TotalRolls">Total Rolls:0</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-center">
+              <table class="table table-dark table-striped" style="width: 90%;">
+                    <colgroup>
+                        <col span="1" style="width: 33%;">
+                        <col span="1" style="width: 33%;">
+                        <col span="1" style="width: 33%;">
+                    </colgroup>
+                    <thead>
+                        <tr style="background-color:#3d3d3d;color:#ffffff">
+                            <th scope="col">Face</th>
+                            <th scope="col">Count</th>
+                            <th scope="col">%</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="FaceCounts1">
+                    </tbody>
+              </table>
+            </div>
+            <div class="col text-center">
+              <table class="table table-dark table-striped" style="width: 90%;">
+                    <colgroup>
+                        <col span="1" style="width: 33%;">
+                        <col span="1" style="width: 33%;">
+                        <col span="1" style="width: 33%;">
+                    </colgroup>
+                    <thead>
+                        <tr style="background-color:#3d3d3d;color:#ffffff">
+                            <th scope="col">Face</th>
+                            <th scope="col">Count</th>
+                            <th scope="col">%</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="FaceCounts2">
+                    </tbody>
+              </table>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+<script type="text/javascript">
+
+    if (localStorage.getItem("counts") === null) {
+        var counts = {
+            1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0,
+            11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0
+        }
+    } else {
+        var counts = JSON.parse( localStorage.getItem("counts"));
+    }
+
+
+    var rollcount = 0;
+    updatedicebuildertabletable()
+    function updatedicebuildertabletable() {
+        console.log(counts)
+        rollcount = 0
+
+        $("#FaceCounts1").empty();
+        $("#FaceCounts2").empty();
+        var table1 = document.getElementById("FaceCounts1")
+        var table2 = document.getElementById("FaceCounts2")
+
+        for (var i = 1; i <= 20; i++) {
+            rollcount += counts[i]
+        }
+
+        for (var i = 1; i <= 20; i++) {
+            if (i<=10) {
+                var row = table1.insertRow(-1);
+            } else {
+                var row = table2.insertRow(-1);
+            }
+
+            var Face = row.insertCell(0);
+            var Count = row.insertCell(1);
+            var per = row.insertCell(2);
+            Face.innerHTML = i
+            Count.innerHTML = "<input type='number' class='form-control' id='"+i+"' value="+counts[i]+" onchange='countchange(this)'>";
+            Count.innerHTML += '<button type="button" class="btn btn-info btn-sm" onclick="roll(this)" value="'+i+'-1">+1 </button>';
+            Count.innerHTML += '<button type="button" class="btn btn-info btn-sm" onclick="roll(this)" value="'+i+'-10">+10 </button>';
+            Count.setAttribute("style", "display: flex;");
+            per.innerHTML = (counts[i]/rollcount*100).toFixed(1);
+        }
+        var TotalRolls = document.getElementById("TotalRolls")
+        TotalRolls.innerHTML = "Total Rolls:" + rollcount
+        if (rollcount<100){
+            TotalRolls.innerHTML += "<br>You need at least 100 minimum"
+        } else {
+            var exp = rollcount / 20
+
+            var p = 1
+            var maxcnt = Math.floor(exp)
+            var rest = (rollcount-maxcnt)/19
+            while (p>0.05) {
+                maxcnt +=1
+                rest = (rollcount-maxcnt)/19
+
+                var x2 = 0
+
+                x = (maxcnt - exp) ** 2
+                x = x / exp
+                x2 += x
+                x = (rest - exp) ** 2
+                x = x / exp
+                x2 += x*19
+
+                p = compute(x2,19)
+            }
+            TotalRolls.innerHTML += "<br>This many rolls will detect an imbalance of approx " + (maxcnt/rest).toFixed(2) + "x"
+            TotalRolls.innerHTML += "<br>That is to say this will detect when you have a singular imbalanced side that is rolled approx " + (maxcnt/rollcount*100).toFixed(1) + "% of the time."
+            console.log("--------")
+            console.log(p)
+            console.log(maxcnt)
+            console.log(rest)
+            console.log(maxcnt/rest)
+            console.log("--------")
+
+
+        }
+        chisqx()
+        localStorage.setItem("counts", JSON.stringify(counts));
+    }
+
+    function countchange(cell) {
+        var face = parseInt(cell.id);
+        var count = parseInt(cell.value);
+
+        counts[face] = count
+
+        updatedicebuildertabletable()
+    }
+
+    function roll(button) {
+        var face = parseInt(button.value.split('-')[0]);
+        var cnt = parseInt(button.value.split('-')[1]);
+        counts[face] += cnt
+        updatedicebuildertabletable()
+    }
+
+    function pnotes(p,loc,groups){
+        scoreloc = loc+"score"
+        noteloc = loc+"note"
+        var scoreel = document.getElementById(scoreloc)
+        var noteel = document.getElementById(noteloc)
+
+        if (rollcount<groups*5){
+            scoreel.innerHTML = "NA"
+            noteel.innerHTML = "100 rolls required"
+        } else {
+            scoreel.innerHTML = "p="+ p.toFixed(4)
+            if (p<0.05){
+                noteel.innerHTML = "This dice is statistically imbalanced towards 1 or more faces."
+            } else if (p<0.1) {
+                noteel.innerHTML = "This dice is not statistically imbalanced but there is reason for concern."
+            } else {
+                noteel.innerHTML = "This dice is not statistically imbalanced."
+            }
+
+        }
+    }
+
+    function chisqx() {
+        var exp = rollcount / 20
+        var x2 = 0
+        for (var i = 1; i <= 20; i++) {
+            x = (counts[i] - exp) ** 2
+            x = x / exp
+            x2 += x
+        }
+        console.log(x2)
+        pnotes(compute(x2, 19),"single",20)
+
+    }
+
+
+    function LogGamma(Z) {
+        with (Math) {
+            var S=1+76.18009173/Z-86.50532033/(Z+1)+24.01409822/(Z+2)-1.231739516/(Z+3)+.00120858003/(Z+4)-.00000536382/(Z+5);
+            var LG= (Z-.5)*log(Z+4.5)-(Z+4.5)+log(S*2.50662827465);
+        }
+        return LG
+    }
+    function Gcf(X,A) {        // Good for X>A+1
+        with (Math) {
+            var A0=0;
+            var B0=1;
+            var A1=1;
+            var B1=X;
+            var AOLD=0;
+            var N=0;
+            while (abs((A1-AOLD)/A1)>.00001) {
+                AOLD=A1;
+                N=N+1;
+                A0=A1+(N-A)*A0;
+                B0=B1+(N-A)*B0;
+                A1=X*A0+N*A1;
+                B1=X*B0+N*B1;
+                A0=A0/B1;
+                B0=B0/B1;
+                A1=A1/B1;
+                B1=1;
+            }
+            var Prob=exp(A*log(X)-X-LogGamma(A))*A1;
+        }
+        return 1-Prob
+    }
+    function Gser(X,A) {        // Good for X<A+1.
+        with (Math) {
+            var T9=1/A;
+            var G=T9;
+            var I=1;
+            while (T9>G*.00001) {
+                T9=T9*X/(A+I);
+                G=G+T9;
+                I=I+1;
+            }
+            G=G*exp(A*log(X)-X-LogGamma(A));
+        }
+        return G
+    }
+    function Gammacdf(x,a) {
+        var GI;
+        if (x<=0) {
+            GI=0
+        } else if (x<a+1) {
+            GI=Gser(x,a)
+        } else {
+            GI=Gcf(x,a)
+        }
+        return GI
+    }
+    function compute(Z,DF) {
+        Chisqcdf = Gammacdf(Z / 2, DF / 2)
+        p = 1 - Chisqcdf
+        return p
+    }
+</script>
+
+
+
+</html>
