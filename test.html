@@ -434,7 +434,7 @@
             $("#VertexCounts2").empty();
             var table1 = document.getElementById("VertexCounts1")
             var table2 = document.getElementById("VertexCounts2")
-
+            vertexcounts = []
             for (var i = 0; i < vertex.length; i++) {
                 if (i % 2 == 0){
                     var row = table1.insertRow(-1);
@@ -459,6 +459,7 @@
                 }
                 NeighboursValue.innerHTML = Nval;
                 Count.innerHTML = Vsum;
+                vertexcounts.push(Vsum)
                 Per.innerHTML = (Vsum / rollcount * 100).toFixed(1);
             }
 
@@ -503,14 +504,20 @@
             scoreel.innerHTML = "p="+ p.toFixed(4)
             if (p<0.05){
                 if (loc === "single") {
-                    noteel.innerHTML = "This dice is statistically imbalanced towards 1 or more faces."
+                    noteel.innerHTML = "<p>This dice is statistically imbalanced towards 1 or more faces.<\p>"
                 } else if (loc === "neighbour") {
-                    noteel.innerHTML = "This dice is statistically imbalanced towards 1 or more sets of neighbours."
+                    noteel.innerHTML = "<p>This dice is statistically imbalanced towards 1 or more sets of neighbours.<\p>"
+                } else if (loc === "vertex") {
+                    noteel.innerHTML = "<p>This dice is statistically imbalanced towards 1 or more sets of vertex.<\p>"
                 }
             } else if (p<0.1) {
-                noteel.innerHTML = "This dice is not statistically imbalanced but there is reason for concern."
+                noteel.innerHTML = "<p>This dice is likely not statistically imbalanced but there is reason for concern.<\p>"
             } else {
-                noteel.innerHTML = "This dice is not statistically imbalanced."
+                noteel.innerHTML = "<p>This dice is likely not statistically imbalanced.<\p>"
+            }
+
+            if (loc === "neighbour" || loc === "vertex") {
+                noteel.innerHTML += "<p style='font-size: 12px;'>Due to how this is calculated, this should be treated as indicative and not concrete.<\p>"
             }
 
         }
@@ -527,7 +534,7 @@
         console.log(x2)
         pnotes(compute(x2, 19),"single",20)
 
-        if (! neighbourscomplete) {
+        if (neighbourscomplete) {
             var c = 0
             for (var i = 1; i <= 20; i++) {
                 c += neighbourscounts[i]
@@ -543,6 +550,22 @@
             console.log(x2)
             console.log(compute(x2, 19))
             pnotes(compute(x2, 19), "neighbour", 20)
+
+            var c = 0
+            for (var i = 0; i < vertexcounts.length; i++) {
+                c += vertexcounts[i]
+            }
+            var exp = c / vertexcounts.length
+            var x2 = 0
+            for (var i = 0; i < vertexcounts.length; i++) {
+                x = (vertexcounts[i] - exp) ** 2
+                x = x / exp
+                x2 += x
+            }
+            console.log(vertexcounts)
+            console.log(x2)
+            console.log(compute(x2, vertexcounts.length-1))
+            pnotes(compute(x2, vertexcounts.length-1), "vertex", vertexcounts.length)
 
         } else {
             locs = ["neighbour","vertex"]
