@@ -65,6 +65,9 @@
 
             </div>
         </div>
+        <div class="row" id="error">
+            <p style="color:red;color:red;font-size:20px;font-weight: bold;">No Valid Matches Remain, you have likely made an error</p>
+        </div>
 
 
         <div class="row text-center">
@@ -116,6 +119,8 @@
         console.log(diceneighbours)
         $("#dicebuildertable").empty();
         var table = document.getElementById("dicebuildertable")
+        var Complete = true
+        var NoMatches = 0
         for (var i = 1; i <= 20; i++) {
             console.log(i)
             var row = table.insertRow(-1);
@@ -131,30 +136,49 @@
             Neighbours.innerHTML = neighbourtxt
 
             var optiontxt = ""
-            var Complete = true
+            var nomatch = true
             for (var f = 1; f <= 20; f++) {
-                if (diceneighbours[i].length >= 3 ){
-                } else if (diceneighbours[f].length >= 3 ){
-                } else if (f===i){
-                } else if (diceneighbours[i].includes(f)){
+                if (diceneighbours[i].length >= 3) {
+                    console.log(i, "diceneighbours[i].length >= 3")
+                } else if (diceneighbours[f].length >= 3) {
+                    console.log(i, "diceneighbours[f].length >= 3")
+                } else if (f === i) {
+                } else if (diceneighbours[i].includes(f)) {
                 } else {
+                    nomatch=false
                     optiontxt += '<button type="button" class="btn btn-info btn-sm" onclick="addneighbour(this)" value="' + i + '-' + f + '">' + f + '</button>';
                     Complete = false
                 }
             }
             Options.innerHTML = optiontxt
-
-            var buttonloca = document.getElementById("endbuttona")
-            var buttonlocb = document.getElementById("endbuttonb")
-            if (Complete){
-                var b = '<button type="button" class="btn btn-primary" onclick="completebuild(this)">All Done</button>'
-                buttonloca.innerHTML = b
-                buttonlocb.innerHTML = b
-            } else {
-                var b = '<button type="button" class="btn btn-primary" onclick="skipbuild(this)">Skip this Bullshit</button>'
-                buttonloca.innerHTML = b
-                buttonlocb.innerHTML = b
+            if (nomatch){
+                NoMatches+=1
             }
+        }
+
+        for (var i = 1; i <= 20; i++) {
+            if (diceneighbours[i].length < 3) {
+                Complete = false
+            }
+        }
+
+        var x = document.getElementById("error");
+        if (!Complete && NoMatches === 20) {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+
+        var buttonloca = document.getElementById("endbuttona")
+        var buttonlocb = document.getElementById("endbuttonb")
+        if (Complete) {
+            var b = '<button type="button" class="btn btn-primary" onclick="completebuild(this)">All Done</button>'
+            buttonloca.innerHTML = b
+            buttonlocb.innerHTML = b
+        } else {
+            var b = '<button type="button" class="btn btn-primary" onclick="skipbuild(this)">Skip this Bullshit</button>'
+            buttonloca.innerHTML = b
+            buttonlocb.innerHTML = b
         }
     }
 
@@ -167,11 +191,13 @@
     }
 
     function reallyskipbuild(button) {
-        var buttonloca = document.getElementById("endbuttona")
-        var buttonlocb = document.getElementById("endbuttonb")
-        var b = '<button type="button" class="btn btn-danger" >OKAY BYE</button>'
-        buttonloca.innerHTML = b
-        buttonlocb.innerHTML = b
+        localStorage.setItem("neighbourscomplete", "false");
+        window.location = "./test";
+    }
+
+    function completebuild(button) {
+        localStorage.setItem("neighbourscomplete", "true");
+        window.location = "./test";
     }
 
     function addneighbour(button) {

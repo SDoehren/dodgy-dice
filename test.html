@@ -52,6 +52,10 @@
             vertical-align: middle;
         }
 
+        .diewidth {
+            width: 2rem !important;
+        }
+
     </style>
 
 </head>
@@ -146,6 +150,48 @@
               </table>
             </div>
         </div>
+        <div class="row" id="NeighboursTables">
+            <div class="col text-center">
+              <table class="table table-dark table-striped" style="width: 90%;">
+                    <colgroup>
+                        <col span="1" style="width: 25%;">
+                        <col span="1" style="width: 25%;">
+                        <col span="1" style="width: 25%;">
+                        <col span="1" style="width: 25%;">
+                    </colgroup>
+                    <thead>
+                        <tr style="background-color:#3d3d3d;color:#ffffff">
+                            <th scope="col">Face</th>
+                            <th scope="col">Neighbours</th>
+                            <th scope="col">Count</th>
+                            <th scope="col">%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="NeighboursCounts1">
+                    </tbody>
+              </table>
+            </div>
+            <div class="col text-center">
+              <table class="table table-dark table-striped" style="width: 90%;">
+                    <colgroup>
+                        <col span="1" style="width: 25%;">
+                        <col span="1" style="width: 25%;">
+                        <col span="1" style="width: 25%;">
+                        <col span="1" style="width: 25%;">
+                    </colgroup>
+                    <thead>
+                        <tr style="background-color:#3d3d3d;color:#ffffff">
+                            <th scope="col">Face</th>
+                            <th scope="col">Neighbours</th>
+                            <th scope="col">Count</th>
+                            <th scope="col">%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="NeighboursCounts2">
+                    </tbody>
+              </table>
+            </div>
+        </div>
 
     </div>
 </body>
@@ -159,6 +205,14 @@
         }
     } else {
         var counts = JSON.parse( localStorage.getItem("counts"));
+    }
+
+    if (localStorage.getItem("neighbourscomplete") === "true") {
+        var diceneighbours = JSON.parse( localStorage.getItem("neighbours"));
+        var neighbourscomplete = true;
+    } else {
+        var diceneighbours;
+        var neighbourscomplete = false;
     }
 
 
@@ -230,6 +284,52 @@
 
 
         }
+
+        if (neighbourscomplete) {
+             var neighbourscounts = {
+                 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0,
+                 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0
+             }
+
+             for (var i = 1; i <= 20; i++) {
+                 neighbourscounts[i] += counts[i]
+                 for (var j = 0; j < 3; j++) {
+                     neighbourscounts[i] += counts[diceneighbours[i][j]]
+                 }
+
+             }
+             var NeighboursTables = document.getElementById("NeighboursTables")
+             NeighboursTables.style.display = "";
+
+             $("#NeighboursCounts1").empty();
+             $("#NeighboursCounts2").empty();
+             var table1 = document.getElementById("NeighboursCounts1")
+             var table2 = document.getElementById("NeighboursCounts2")
+
+             for (var i = 1; i <= 20; i++) {
+                 if (i <= 10) {
+                     var row = table1.insertRow(-1);
+                 } else {
+                     var row = table2.insertRow(-1);
+                 }
+                 var Face = row.insertCell(0);
+                 var Neighbours = row.insertCell(1);
+                 var Count = row.insertCell(2);
+                 var Per = row.insertCell(3);
+                 Face.innerHTML = i
+                 Neighbours.innerHTML = "";
+                 for (var j = 0; j < 3; j++) {
+                     Neighbours.innerHTML += '<button type="button" class="btn btn-outline-light btn-sm diewidth" disabled>'+diceneighbours[i][j]+'</button>'
+                 }
+                 Count.innerHTML = neighbourscounts[i];
+                 Per.innerHTML = (neighbourscounts[i]/rollcount*100).toFixed(1);
+             }
+         } else {
+            var NeighboursTables = document.getElementById("NeighboursTables")
+            NeighboursTables.style.display = "none";
+        }
+
+
         chisqx()
         localStorage.setItem("counts", JSON.stringify(counts));
     }
@@ -282,6 +382,12 @@
         }
         console.log(x2)
         pnotes(compute(x2, 19),"single",20)
+
+        if (neighbourscomplete) {
+
+        } else {
+
+        }
 
     }
 
