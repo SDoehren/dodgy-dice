@@ -154,6 +154,53 @@
             <div class="col text-center">
               <table class="table table-dark table-striped" style="width: 90%;">
                     <colgroup>
+                        <col span="1" style="width: 20%;">
+                        <col span="1" style="width: 20%;">
+                        <col span="1" style="width: 20%;">
+                        <col span="1" style="width: 20%;">
+                        <col span="1" style="width: 20%;">
+                    </colgroup>
+                    <thead>
+                        <tr style="background-color:#3d3d3d;color:#ffffff">
+                            <th scope="col">Face</th>
+                            <th scope="col">Neighbours</th>
+                            <th scope="col">Neighbourhood Value</th>
+                            <th scope="col">Count</th>
+                            <th scope="col">%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="NeighboursCounts1">
+                    </tbody>
+              </table>
+            </div>
+            <div class="col text-center">
+              <table class="table table-dark table-striped" style="width: 90%;">
+                    <colgroup>
+                        <col span="1" style="width: 20%;">
+                        <col span="1" style="width: 20%;">
+                        <col span="1" style="width: 20%;">
+                        <col span="1" style="width: 20%;">
+                        <col span="1" style="width: 20%;">
+                    </colgroup>
+                    <thead>
+                        <tr style="background-color:#3d3d3d;color:#ffffff">
+                            <th scope="col">Face</th>
+                            <th scope="col">Neighbours</th>
+                            <th scope="col">Neighbourhood Value</th>
+                            <th scope="col">Count</th>
+                            <th scope="col">%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="NeighboursCounts2">
+                    </tbody>
+              </table>
+            </div>
+        </div>
+
+        <div class="row" id="VertexTables">
+            <div class="col text-center">
+              <table class="table table-dark table-striped" style="width: 90%;">
+                    <colgroup>
                         <col span="1" style="width: 25%;">
                         <col span="1" style="width: 25%;">
                         <col span="1" style="width: 25%;">
@@ -161,13 +208,13 @@
                     </colgroup>
                     <thead>
                         <tr style="background-color:#3d3d3d;color:#ffffff">
-                            <th scope="col">Face</th>
-                            <th scope="col">Neighbours</th>
+                            <th scope="col">Vertex</th>
+                            <th scope="col">Vertex Value</th>
                             <th scope="col">Count</th>
                             <th scope="col">%</th>
                         </tr>
                     </thead>
-                    <tbody id="NeighboursCounts1">
+                    <tbody id="VertexCounts1">
                     </tbody>
               </table>
             </div>
@@ -181,13 +228,13 @@
                     </colgroup>
                     <thead>
                         <tr style="background-color:#3d3d3d;color:#ffffff">
-                            <th scope="col">Face</th>
-                            <th scope="col">Neighbours</th>
+                            <th scope="col">Vertex</th>
+                            <th scope="col">Vertex Value</th>
                             <th scope="col">Count</th>
                             <th scope="col">%</th>
                         </tr>
                     </thead>
-                    <tbody id="NeighboursCounts2">
+                    <tbody id="VertexCounts2">
                     </tbody>
               </table>
             </div>
@@ -209,15 +256,70 @@
 
     if (localStorage.getItem("neighbourscomplete") === "true") {
         var diceneighbours = JSON.parse( localStorage.getItem("neighbours"));
+        var vertex = buildvertex(diceneighbours)
         var neighbourscomplete = true;
     } else {
         var diceneighbours;
+        var vertex;
         var neighbourscomplete = false;
     }
 
+    var neighbourscounts = {
+                 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0,
+                 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0
+             };
+
+    var vertexcounts = [];
 
     var rollcount = 0;
     updatedicebuildertabletable()
+
+
+    function buildvertex(diceneighbours){
+        var vertexpack = []
+        for (var i = 1; i <= 20; i++) {
+            var arr = diceneighbours[i]
+            var result = arr.flatMap(
+                (v, i) => arr.slice(i+1).map( w => [v,w] )
+            );
+            for (var j = 0; j < result.length; j++) {
+                a = result[j][0]
+                b = result[j][1]
+
+                aneigh = diceneighbours[a]
+                bneigh = diceneighbours[b]
+
+                aneigh = aneigh.filter(function(e) { return e !== i })
+                bneigh = bneigh.filter(function(e) { return e !== i })
+                for (var ani = 0; ani < aneigh.length; ani++) {
+                    anival = aneigh[ani]
+                    for (var bni = 0; bni < bneigh.length; bni++) {
+                        bnival = bneigh[bni]
+
+                        if (diceneighbours[anival].includes(bnival)) {
+                            vorset = [i, a, b, anival, bnival]
+                            vorset.sort(function (a, b) {return a - b;});
+                            vorset = JSON.stringify(vorset)
+                            if (! vertexpack.includes(vorset)){
+                                vertexpack.push(vorset)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (var j = 0; j < vertexpack.length; j++) {
+            vertexpack[j] = JSON.parse(vertexpack[j])
+        }
+        for (var j = 4; j >= 0; j--) {
+            vertexpack.sort(function (a, b) {
+                return a[j] - b[j];
+            });
+        }
+        return vertexpack
+    }
+
+
     function updatedicebuildertabletable() {
         console.log(counts)
         rollcount = 0
@@ -232,7 +334,7 @@
         }
 
         for (var i = 1; i <= 20; i++) {
-            if (i<=10) {
+            if (i <= 10) {
                 var row = table1.insertRow(-1);
             } else {
                 var row = table2.insertRow(-1);
@@ -242,25 +344,25 @@
             var Count = row.insertCell(1);
             var per = row.insertCell(2);
             Face.innerHTML = i
-            Count.innerHTML = "<input type='number' class='form-control' id='"+i+"' value="+counts[i]+" onchange='countchange(this)'>";
-            Count.innerHTML += '<button type="button" class="btn btn-info btn-sm" onclick="roll(this)" value="'+i+'-1">+1 </button>';
-            Count.innerHTML += '<button type="button" class="btn btn-info btn-sm" onclick="roll(this)" value="'+i+'-10">+10 </button>';
+            Count.innerHTML = "<input type='number' class='form-control' id='" + i + "' value=" + counts[i] + " onchange='countchange(this)'>";
+            Count.innerHTML += '<button type="button" class="btn btn-info btn-sm" onclick="roll(this)" value="' + i + '-1">+1 </button>';
+            Count.innerHTML += '<button type="button" class="btn btn-info btn-sm" onclick="roll(this)" value="' + i + '-10">+10 </button>';
             Count.setAttribute("style", "display: flex;");
-            per.innerHTML = (counts[i]/rollcount*100).toFixed(1);
+            per.innerHTML = (counts[i] / rollcount * 100).toFixed(1);
         }
         var TotalRolls = document.getElementById("TotalRolls")
         TotalRolls.innerHTML = "Total Rolls:" + rollcount
-        if (rollcount<100){
+        if (rollcount < 100) {
             TotalRolls.innerHTML += "<br>You need at least 100 minimum"
         } else {
             var exp = rollcount / 20
 
             var p = 1
             var maxcnt = Math.floor(exp)
-            var rest = (rollcount-maxcnt)/19
-            while (p>0.05) {
-                maxcnt +=1
-                rest = (rollcount-maxcnt)/19
+            var rest = (rollcount - maxcnt) / 19
+            while (p > 0.05) {
+                maxcnt += 1
+                rest = (rollcount - maxcnt) / 19
 
                 var x2 = 0
 
@@ -269,64 +371,102 @@
                 x2 += x
                 x = (rest - exp) ** 2
                 x = x / exp
-                x2 += x*19
+                x2 += x * 19
 
-                p = compute(x2,19)
+                p = compute(x2, 19)
             }
-            TotalRolls.innerHTML += "<br>This many rolls will detect an imbalance of approx " + (maxcnt/rest).toFixed(2) + "x"
-            TotalRolls.innerHTML += "<br>That is to say this will detect when you have a singular imbalanced side that is rolled approx " + (maxcnt/rollcount*100).toFixed(1) + "% of the time."
-            console.log("--------")
-            console.log(p)
-            console.log(maxcnt)
-            console.log(rest)
-            console.log(maxcnt/rest)
-            console.log("--------")
-
-
+            TotalRolls.innerHTML += "<br>This many rolls will detect an imbalance of approx " + (maxcnt / rest).toFixed(2) + "x"
+            TotalRolls.innerHTML += "<br>That is to say this will detect when you have a singular imbalanced side that is rolled approx " + (maxcnt / rollcount * 100).toFixed(1) + "% of the time."
         }
 
         if (neighbourscomplete) {
-             var neighbourscounts = {
-                 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0,
-                 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0
-             }
+            neighbourscounts = {
+                1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0,
+                11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0
+            }
 
-             for (var i = 1; i <= 20; i++) {
-                 neighbourscounts[i] += counts[i]
-                 for (var j = 0; j < 3; j++) {
-                     neighbourscounts[i] += counts[diceneighbours[i][j]]
-                 }
+            for (var i = 1; i <= 20; i++) {
+                diceneighbours[i].sort(function (a, b) {
+                    return a - b;
+                });
 
-             }
-             var NeighboursTables = document.getElementById("NeighboursTables")
-             NeighboursTables.style.display = "";
+                neighbourscounts[i] += counts[i]
+                for (var j = 0; j < 3; j++) {
+                    neighbourscounts[i] += counts[diceneighbours[i][j]]
+                }
+            }
+            var NeighboursTables = document.getElementById("NeighboursTables")
+            NeighboursTables.style.display = "";
 
-             $("#NeighboursCounts1").empty();
-             $("#NeighboursCounts2").empty();
-             var table1 = document.getElementById("NeighboursCounts1")
-             var table2 = document.getElementById("NeighboursCounts2")
+            $("#NeighboursCounts1").empty();
+            $("#NeighboursCounts2").empty();
+            var table1 = document.getElementById("NeighboursCounts1")
+            var table2 = document.getElementById("NeighboursCounts2")
 
-             for (var i = 1; i <= 20; i++) {
-                 if (i <= 10) {
-                     var row = table1.insertRow(-1);
-                 } else {
-                     var row = table2.insertRow(-1);
-                 }
-                 var Face = row.insertCell(0);
-                 var Neighbours = row.insertCell(1);
-                 var Count = row.insertCell(2);
-                 var Per = row.insertCell(3);
-                 Face.innerHTML = i
-                 Neighbours.innerHTML = "";
-                 for (var j = 0; j < 3; j++) {
-                     Neighbours.innerHTML += '<button type="button" class="btn btn-outline-light btn-sm diewidth" disabled>'+diceneighbours[i][j]+'</button>'
-                 }
-                 Count.innerHTML = neighbourscounts[i];
-                 Per.innerHTML = (neighbourscounts[i]/rollcount*100).toFixed(1);
-             }
-         } else {
+            for (var i = 1; i <= 20; i++) {
+                if (i <= 10) {
+                    var row = table1.insertRow(-1);
+                } else {
+                    var row = table2.insertRow(-1);
+                }
+                var Face = row.insertCell(0);
+                var Neighbours = row.insertCell(1);
+                var NeighboursValue = row.insertCell(2);
+                var Count = row.insertCell(3);
+                var Per = row.insertCell(4);
+                Face.innerHTML = i
+                Neighbours.innerHTML = "";
+
+                var Nval = i
+
+                for (var j = 0; j < 3; j++) {
+                    Neighbours.innerHTML += '<button type="button" class="btn btn-outline-light btn-sm diewidth" disabled>' + diceneighbours[i][j] + '</button>'
+                    Nval += diceneighbours[i][j]
+                }
+                NeighboursValue.innerHTML = Nval;
+                Count.innerHTML = neighbourscounts[i];
+                Per.innerHTML = (neighbourscounts[i] / rollcount * 100).toFixed(1);
+            }
+
+            var VertexTables = document.getElementById("VertexTables")
+            VertexTables.style.display = "";
+            $("#VertexCounts1").empty();
+            $("#VertexCounts2").empty();
+            var table1 = document.getElementById("VertexCounts1")
+            var table2 = document.getElementById("VertexCounts2")
+
+            for (var i = 0; i < vertex.length; i++) {
+                if (i % 2 == 0){
+                    var row = table1.insertRow(-1);
+                } else {
+                    var row = table2.insertRow(-1);
+                }
+
+                var Neighbours = row.insertCell(0);
+                var NeighboursValue = row.insertCell(1);
+                var Count = row.insertCell(2);
+                var Per = row.insertCell(3);
+
+                Neighbours.innerHTML = "";
+
+                var Nval = 0
+                var Vsum = 0
+
+                for (var j = 0; j < 5; j++) {
+                    Neighbours.innerHTML += '<button type="button" class="btn btn-outline-light btn-sm diewidth" disabled>' + vertex[i][j] + '</button>'
+                    Nval += vertex[i][j]
+                    Vsum += counts[vertex[i][j]]
+                }
+                NeighboursValue.innerHTML = Nval;
+                Count.innerHTML = Vsum;
+                Per.innerHTML = (Vsum / rollcount * 100).toFixed(1);
+            }
+
+        } else {
             var NeighboursTables = document.getElementById("NeighboursTables")
             NeighboursTables.style.display = "none";
+            var VertexTables = document.getElementById("VertexTables")
+            VertexTables.style.display = "none";
         }
 
 
@@ -362,7 +502,11 @@
         } else {
             scoreel.innerHTML = "p="+ p.toFixed(4)
             if (p<0.05){
-                noteel.innerHTML = "This dice is statistically imbalanced towards 1 or more faces."
+                if (loc === "single") {
+                    noteel.innerHTML = "This dice is statistically imbalanced towards 1 or more faces."
+                } else if (loc === "neighbour") {
+                    noteel.innerHTML = "This dice is statistically imbalanced towards 1 or more sets of neighbours."
+                }
             } else if (p<0.1) {
                 noteel.innerHTML = "This dice is not statistically imbalanced but there is reason for concern."
             } else {
@@ -383,10 +527,35 @@
         console.log(x2)
         pnotes(compute(x2, 19),"single",20)
 
-        if (neighbourscomplete) {
+        if (! neighbourscomplete) {
+            var c = 0
+            for (var i = 1; i <= 20; i++) {
+                c += neighbourscounts[i]
+            }
+            var exp = c / 20
+            var x2 = 0
+            for (var i = 1; i <= 20; i++) {
+                x = (neighbourscounts[i] - exp) ** 2
+                x = x / exp
+                x2 += x
+            }
+            console.log(neighbourscounts)
+            console.log(x2)
+            console.log(compute(x2, 19))
+            pnotes(compute(x2, 19), "neighbour", 20)
 
         } else {
+            locs = ["neighbour","vertex"]
 
+            for (var x=0; x<2; x++) {
+                loc = locs[x]
+                scoreloc = loc + "score"
+                noteloc = loc + "note"
+                var scoreel = document.getElementById(scoreloc)
+                var noteel = document.getElementById(noteloc)
+                scoreel.innerHTML = "You need to build the die for "+loc+" analysis"
+                noteel.innerHTML = '<a href="/dodgydice"><button type="button" class="btn btn-outline-light">Build the Die</button></a>'
+            }
         }
 
     }
